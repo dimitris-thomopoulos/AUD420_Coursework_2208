@@ -2,6 +2,7 @@
 // Διαδραστικά Συστήματα Ήχου - Τελική εργαία (Σεπτέμβριος 2022)
 
 // Όνομα μουσικής σύνθεσης: 'PADOU'
+// Listen with headphones  )))d[-_-]b(((
 
 s.boot;
 s.reboot;
@@ -19,10 +20,17 @@ t = TempoClock(108/60).permanent_(true);
 ~b_minor = [-13, -9, -1, 3];
 ~a_sharp = [-14, -2, 2, 5];
 
-// χρήση του Buffer.read - εισάγουμε το έτοιμο sample μπότας (kick) και τις μαράκες (shakers) από τον φάκελο των samples:
+// χρήση του Buffer.read - εισάγουμε το έτοιμο sample μπότας (kick), τις κιθάρες και τις μαράκες (shakers) από τον φάκελο των samples:
 ~kickdrum = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/GrvKick06.wav");
 ~shakers = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/shaker.wav");
 ~bamboo = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/bamboo.wav");
+
+~guitar = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/guitar.wav");
+~guitar2 = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/guitar2.wav");
+~guitarShort = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/guitarShort.wav");
+~guitarOutro = Buffer.read(s, thisProcess.nowExecutingPath.dirname+/+"/samples/guitarOutro.wav");
+
+
 
 (
 SynthDef.new(\kickdrum, {
@@ -31,6 +39,38 @@ SynthDef.new(\kickdrum, {
 	env = Env([0, 1, 0], [atk,rel], [c1,c2]).kr(2);
 	sig = PlayBuf.ar(2, ~kickdrum.bufnum);
 	sig = sig * env;
+	Out.ar(out,sig);
+}).add;
+);
+
+(
+SynthDef.new(\guitar, {
+	var out=0, sig;
+	sig = PlayBuf.ar(2, ~guitar.bufnum, doneAction: 2);
+	Out.ar(out,sig);
+}).add;
+);
+
+(
+SynthDef.new(\guitar2, {
+	var out=0, sig;
+	sig = PlayBuf.ar(2, ~guitar2.bufnum, doneAction: 2);
+	Out.ar(out,sig);
+}).add;
+);
+
+(
+SynthDef.new(\guitarShort, {
+	var out=0, sig;
+	sig = PlayBuf.ar(2, ~guitarShort.bufnum, doneAction: 2);
+	Out.ar(out,sig);
+}).add;
+);
+
+(
+SynthDef.new(\guitarOutro, {
+	var out=0, sig;
+	sig = PlayBuf.ar(2, ~guitarOutro.bufnum, doneAction: 2);
 	Out.ar(out,sig);
 }).add;
 );
@@ -57,6 +97,7 @@ SynthDef.new(\bamboo, {
 }).add;
 );
 
+
 // με τη χρήση του SynthDef και των envelopes φτιάχνουμε τους βασικούς ήχους:
 
 // με το SynthDef φτιάχνουμε το μπάσο:
@@ -72,14 +113,6 @@ SynthDef(
 		Out.ar([0,1],audio);
 	}
 ).store;
-
-Pbind(
-	\instrument, \sawbass,
-	\note, 39,
-	\dur, 8,
-	\amp, 0.5,
-	\cutoff, 150
-).play(t);
 
 // με παρόμοιο τρόπο φτιάχνουμε το snare τύμπανο και τα hi-hat (πιατίνια):
 
@@ -353,6 +386,18 @@ Pbind(
 	\dur, Pseq([Pn(0.25,16)], 16)
 ).play(t);
 
+
+// κιθάρα:
+
+Pbind(
+	\instrument, \guitar,
+	\dur, Pseq([66],1),
+	\buf, ~guitar.bufnum;
+).play(t);
+
+
+// πιατίνια:
+
 SystemClock.sched(1.4,
 	{
 		Pbind(
@@ -423,6 +468,161 @@ SystemClock.sched(55.34,
 			\c2, Pser([20, 20, -5, 20, -5, 7, -5, -5, 20,     20, 20, -5, 20, -5, 7, -5, -5, -5], 15),
 			\amp, 0.1,
 			\cutoff, 200,
+		).play(t);
+});
+
+SystemClock.sched(53.33,
+	{
+		Pbind(
+			\instrument, \guitarShort,
+			\dur, Pseq([34],1),
+			\buf, ~guitarShort.bufnum;
+		).play(t);
+});
+
+SystemClock.sched(78.89,
+	{
+	Pbind(
+		\instrument, \guitar2,
+			\dur, Pseq([6], 1),
+		\buf, ~guitar2.bufnum;
+	).play(t);
+});
+
+)
+
+
+(
+
+/////////////////////////////((((FINAL CHORUS))))/////////////////////////////
+Pbind(
+	\note, Pseq([~d_sharp, ~c_sharp, 6, ~b_minor, -6, 3, 5, 6, ~a_sharp], 3),
+	\dur, Pseq([8, 6, 2, 5.5, 0.5, 0.75, 0.75, 0.5, 8], 3),
+	\strum, Pseq([0.02, 0.05, 0, 0.05, 0, 0, 0, 0, 0.02], 3),
+	\legato, Pseq([1, 1.3, 1, 1.35, 1.1, 1, 1, 1, 1], 5),
+	\amp, Pseq([0.08, 0.08, 0.08, 0.08, 0.06, 0.065, 0.07, 0.075, 0.08], 3);
+).play(t);
+
+Pbind(
+	\instrument, "sawbass",
+	\note, Pseq([39, 37, 35, 34], 3),
+	\dur, Pseq([8, 8, 8, 8], 3),
+	\amp, 0.1,
+	\legato, 2,
+	\cutoff, 200,
+).play(t);
+
+SystemClock.sched(2.02,
+	{
+		Pbind(
+			\instrument, "sawbass",
+			\note, Pseq([39, 37, 32, 35, 32, 34, 44, 32, 39], 3),
+			\dur, Pseq([8, 3.7, 4.3, 3.7, 4.3, 2.5, 0.5, 0.5, 4.5],3),
+			\c2, Pseq([20, 20, -5, 20, -5, 7, -5, -5, 20,     20, 20, -5, 20, -5, 7, -5, -5, -20,   20, 20, -5, 20, -5, 7, -5, -5, -5]),
+			\amp, 0.1,
+			\cutoff, 200,
+		).play(t);
+});
+
+~newKick = Pbind(
+	\instrument, \kickdrum,
+	\buf, ~kickdrum,
+	\note, Pseq([0, -2, 0, 0, 0, -2, 0, 0], 2),
+	\dur, Pseq([7.5, 0.5, 6, 2, 7.5, 0.5, 6, 2], 2),
+	\rel, 1,
+	\out, 0
+).play(t);
+
+SystemClock.sched(0.44,
+	{
+		Pbind(
+			\instrument, "snare",
+			\note, Pseq([Pn(0, 11)], 8),
+			\dur, Pseq([0.75, 0.5, 0.5, 0.5, 1, 0.75, 0.75, 0.5, 0.5, 0.5, 1.75], 8),
+			\sinfreq, Pseq([228, 228, 200, 150, 228, 228, 228, 228, 220, 150, 228], 8),
+			\ffreq, Pseq([2000, 2000, 200, 200, 2000, 2000, 2000, 2000, 200, 200, 2000], 8),
+			\att, 0.01,
+			\rel, 0.1,
+			\amp, 0.25
+		).play(t);
+	}
+);
+
+SystemClock.sched(1.9,
+	{
+		Pbind(
+			\instrument, "bamboo",
+			\note, Pseq([0,0], 16),
+			\dur,Pseq([0.25, 3.75], 16),
+			\ffreq, 20,
+			\amp, 0.1
+		).play(t);
+	}
+);
+
+Pbind(
+	\instrument, \shakers,
+	\note, Pser([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 256),
+	\dur, Pseq([Pn(0.25,16)], 16)
+).play(t);
+
+
+// κιθάρα:
+
+Pbind(
+	\instrument, \guitar,
+	\dur, Pseq([66],1),
+	\buf, ~guitar.bufnum;
+).play(t);
+
+
+// πιατίνια:
+
+SystemClock.sched(1.4,
+	{
+		Pbind(
+			\instrument, "cymbal",
+			\note, 0,
+			\dur, Pseq([16], 4),
+			\att, 0.01,
+			\rel, 0.5,
+			\sinfreq, 0,
+			\ffreq, 14000,
+			\amp, 0.3;
+		).play(t);
+	}
+);
+
+Pbind(
+	\instrument, "hihat",
+	\note, Pseq([0, 0, 0, 0, 0, 0, 0, 0, 0], 8),
+	\dur , Pseq([1, 1, 0.25, 1.5, 1.25, 1, 0.25, 1.5, 0.25], 8),
+	\att, 0.01,
+	\rel, 0.08,
+	\sinfreq, 0,
+	\ffreq, 14000,
+	\amp, Pseq([Pn(0.4,9)], 94);
+).play(t);
+
+
+
+/////////////////////////////((((OUTRO))))/////////////////////////////
+
+SystemClock.sched(43.33,
+	{
+		Pbind(
+			\instrument, \guitar2,
+			\dur, Pseq([6],1),
+			\buf, ~guitar2.bufnum;
+		).play(t);
+});
+
+SystemClock.sched(47.77,
+	{
+		Pbind(
+			\instrument, \guitarOutro,
+			\dur, Pseq([18],1),
+			\buf, ~guitarOutro.bufnum;
 		).play(t);
 });
 
